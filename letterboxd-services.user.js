@@ -4,6 +4,7 @@
 // @version      0.7.2
 // @description  Add external movie search links to Letterboxd film pages.
 // @match        https://letterboxd.com/film/*
+// @match        https://letterboxd.com/*/film/*
 // @run-at       document-idle
 // @grant        GM_getValue
 // @grant        GM_setValue
