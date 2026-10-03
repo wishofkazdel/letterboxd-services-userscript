@@ -39,12 +39,12 @@
       {
         name: "BT4G",
         url: `https://bt4gprx.com/search?q=${encodedQuery}`,
-        icon: "https://bt4gprx.com/favicon.ico",
+        icon: "https://bt4gprx.com/static/favicon.ico",
       },
       {
         name: "1337x",
         url: `https://1337x.to/search/${encodedQuery}/1/`,
-        icon: "https://1337x.to/favicon.ico",
+        icon: "https://a.favicon.im/1337x.to?larger=true",
       },
       {
         name: "Lime Torrents",
@@ -97,7 +97,8 @@
     document
       .querySelectorAll(
         "p.service:nth-child(7), div.other:nth-child(2), div.other:nth-child(3), " +
-          ".showmore.js-expand-services.service, .-showmore.js-expand-services.service",
+          ".showmore.js-expand-services.service, .-showmore.js-expand-services.service, " +
+          "div.other:nth-child(1)"
       )
       .forEach((element) => element.style.setProperty("display", "none", "important"));
 
@@ -133,13 +134,24 @@
   }
 
   function waitForAvailability(mode) {
-    const container = document.querySelector("#watch .services");
-    if (!container) {
+    const watch = document.querySelector("#watch");
+    const container = watch?.querySelector(".services");
+    const unavailable = watch?.querySelector(".js-not-streaming");
+
+    if (!watch || (!container && !unavailable)) {
       window.setTimeout(() => waitForAvailability(mode), 500);
       return;
     }
 
-    initialize(container, mode);
+    if (!container && mode !== "disabled") {
+      const services = document.createElement("div");
+      services.className = "services";
+      initialize(services, mode);
+      unavailable.after(services);
+      return;
+    }
+
+    if (container) initialize(container, mode);
   }
 
   waitForAvailability(registerModeCommands());
