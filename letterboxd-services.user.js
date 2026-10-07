@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Letterboxd Services
 // @namespace    https://letterboxd.com/
-// @version      0.7.2
+// @version      0.7.3
 // @description  Add external movie search links to Letterboxd film pages.
 // @match        https://letterboxd.com/film/*
 // @match        https://letterboxd.com/*/film/*
@@ -24,17 +24,16 @@
   function getQuery() {
     const details = document.querySelector(".details");
     const title = details?.querySelector("h1")?.innerText ?? "";
-    const year = details?.querySelector(".releaseyear > a")?.innerText ?? "";
+    const year =
+      details?.querySelector(".releasedate > a:nth-child(1)")?.innerText?.trim() ??
+      details?.querySelector(".releaseyear > a")?.innerText?.trim() ??
+      "";
     return `${title} ${year}`.trim();
   }
 
-  function getImdbId() {
-    const href = document.querySelector('.micro-button[href*="imdb.com/title/"]')?.href;
-    return href?.match(/\/title\/(tt\d+)/)?.[1] ?? "";
-  }
-
-  function getServices(query, imdbId) {
+  function getServices(query) {
     const encodedQuery = encodeURIComponent(query);
+    const okRuQuery = encodeURIComponent(`site:ok.ru ${query}`);
 
     return [
       {
@@ -48,9 +47,9 @@
         icon: "https://a.favicon.im/1337x.to?larger=true",
       },
       {
-        name: "Lime Torrents",
-        url: `https://www.limetorrents.fun/search/all/${encodedQuery}/`,
-        icon: "https://www.limetorrents.fun/favicon.ico",
+        name: "OK.ru",
+        url: `https://duckduckgo.com/?q=${okRuQuery}`,
+        icon: "https://ok.ru/favicon.ico",
       },
       {
         name: "Nyaa",
@@ -98,8 +97,7 @@
     document
       .querySelectorAll(
         "p.service:nth-child(7), div.other:nth-child(2), div.other:nth-child(3), " +
-          ".showmore.js-expand-services.service, .-showmore.js-expand-services.service, " +
-          "div.other:nth-child(1)"
+          ".showmore.js-expand-services.service, .-showmore.js-expand-services.service",
       )
       .forEach((element) => element.style.setProperty("display", "none", "important"));
 
@@ -112,7 +110,7 @@
     if (mode === "disabled") return;
 
     container.querySelectorAll("[data-letterboxd-service]").forEach((item) => item.remove());
-    const services = getServices(getQuery(), getImdbId());
+    const services = getServices(getQuery());
     services.forEach((service) => addService(container, service));
 
     if (!document.getElementById("letterboxd-services-style")) {
